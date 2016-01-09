@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" 
+    name="iis.spacenode"
+    activate="activate" 
+    deactivate="deactivate" 
+    modified="updated" 
+    enabled="true"
+    immediate="true"
+    configuration-policy="require">
+	<implementation class="iis.spacenode.SpaceNode"/>
+
+   <property name="service.pid" type="String" value="iis.spacenode.SpaceNode"/>
+   <service>
+       <provide interface="iis.spacenode.SpaceNode"/>
+   </service>
+   <reference bind="setPositionService" cardinality="1..1" interface="org.eclipse.kura.position.PositionService" name="PositionService" policy="static" unbind="unsetPositionService"/>
+   
+</scr:component>

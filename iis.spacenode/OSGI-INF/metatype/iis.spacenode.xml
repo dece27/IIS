@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
+    <OCD id="iis.spacenode"
+         name="SpaceNode" 
+         description="Kura app for IotIntoSpace SpaceNode.">
+        
+        <Icon resource="OSGI-INF/iis.png" size="32"/>
+        
+    </OCD>
+    
+    <Designate pid="iis.spacenode.SpaceNode">
+        <Object ocdref="iis.spacenode"/>
+    </Designate>
+</MetaData>

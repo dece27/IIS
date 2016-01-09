@@ -1,0 +1,20 @@
+#Deployment Plugin Project File
+#Thu Jan 07 20:43:32 CET 2016
+build.ant.name=<.>/src/main/resources/iis.spacenode_build.xml
+build.dp.file=<.>/target/iis.spacenode.dp
+build.location=
+bundles.0.bundle_path=<.>/.project
+bundles.0.customizer=false
+bundles.0.headers.count=0
+bundles.0.missing=false
+bundles.0.name=bundles/iis.spacenode.jar
+bundles.0.symbolic_name=iis.spacenode;singleton\:\=true
+bundles.0.version=1.0.0
+bundles.count=1
+certificates.count=0
+general.signbundles=false
+headers.other.headers=
+headers.symbolic.name=iis.spacenode
+headers.version=1.0.0
+resources.count=0
+
