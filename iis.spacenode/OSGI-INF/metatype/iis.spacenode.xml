@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
     <OCD id="iis.spacenode"
-         name="SpaceNode" 
-         description="Kura app for IotIntoSpace SpaceNode.">
+         name="IIS - Space Node" 
+         description="Eclipse Kura application for Iot into Space - Space Node project.">
         
         <Icon resource="OSGI-INF/iis.png" size="32"/>
+        
+        <AD id="sampling.rate"  
+            name="sampling.rate"
+            type="Integer"
+            cardinality="0" 
+            required="true"
+            default="10"
+            min="2" 
+            description="Default sensors sampling rate in seconds (min 2)."/>
         
     </OCD>
     

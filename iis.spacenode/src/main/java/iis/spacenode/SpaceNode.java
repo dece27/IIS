@@ -27,12 +27,14 @@ public class SpaceNode implements ConfigurableComponent
 	private ScheduledExecutorService    m_worker;
 	private ScheduledFuture<?>          m_handle;
 
+	//Properties
 	private Map<String, Object>         m_properties;
+	private static final String   		SAMPLING_RATE_PROP_NAME   = "sampling.rate";
 
 	//SHT31
 	private SHT31						dev_SHT31;
 	private double						SHT31_t, SHT31_h;
-	
+
 	//BMP280
 	private BMP280						dev_BMP280;
 	private double						BMP280_t, BMP280_p, BMP280_a;
@@ -75,7 +77,7 @@ public class SpaceNode implements ConfigurableComponent
 		try  {	
 			dev_SHT31 = new SHT31();
 			dev_BMP280 = new BMP280();
-			doUpdate(false);
+			doUpdate();
 		}
 		catch (Exception e) {
 			s_logger.error("Error during component activation", e);
@@ -104,7 +106,7 @@ public class SpaceNode implements ConfigurableComponent
 			s_logger.info("Update - "+s+": "+properties.get(s));
 		}
 
-		doUpdate(true);
+		doUpdate();
 		s_logger.info("Updated " + APP_ID + "...Done.");
 	}
 
@@ -116,19 +118,25 @@ public class SpaceNode implements ConfigurableComponent
 	// ----------------------------------------------------------------
 
 
-	private void doUpdate(boolean onUpdate) 
+	private void doUpdate() 
 	{
 		if (m_handle != null) {
 			m_handle.cancel(true);
 		}
 
+		if (!m_properties.containsKey(SAMPLING_RATE_PROP_NAME)) {
+			s_logger.info("Update " + APP_ID + " - Ignore as properties do not contain SAMPLING_RATE_PROP_NAME.");
+			return;
+		}
+
+		int sampling = (Integer) m_properties.get(SAMPLING_RATE_PROP_NAME);
 		m_handle = m_worker.scheduleAtFixedRate(new Runnable() {		
 			@Override
 			public void run() {
 				Thread.currentThread().setName(getClass().getSimpleName());
 				doSample();
 			}
-		}, 0, 10, TimeUnit.SECONDS); //TODO: Change interval
+		}, 0, sampling, TimeUnit.SECONDS);
 	}
 
 
@@ -140,7 +148,7 @@ public class SpaceNode implements ConfigurableComponent
 		longitude = position.getLongitude();
 		altitude = position.getAltitude();
 		System.out.println("GPS: Lat = " + latitude + " deg, Lon = " + longitude + " deg, Alt = " + altitude + " m");
-		
+
 		//SHT31-D
 		try {
 			SHT31_t = dev_SHT31.getTemperature();
@@ -150,7 +158,7 @@ public class SpaceNode implements ConfigurableComponent
 			e.printStackTrace();
 			s_logger.error("Error during SHT31-D reading", e);
 		}
-		
+
 		//BMP280
 		try {
 			BMP280_t = dev_BMP280.getTemperature();
