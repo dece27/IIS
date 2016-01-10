@@ -76,6 +76,7 @@ public class SpaceNode implements ConfigurableComponent
 		}
 		try  {
 			dev_SHT31 = new SHT31();
+			dev_SHT31.heater(true);
 			dev_BMP280 = new BMP280();
 			position = m_positionService.getNmeaPosition();
 			dev_BMP280.calcSeaLevelhPa(position.getAltitude());
@@ -93,6 +94,12 @@ public class SpaceNode implements ConfigurableComponent
 	{
 		s_logger.info("Deactivating " + APP_ID + "...");
 
+		try {
+			dev_SHT31.heater(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+			s_logger.error("Error disabling SHT31-D Heater", e);
+		}
 		m_worker.shutdown();
 
 		s_logger.info("Deactivating " + APP_ID + "...Done.");
