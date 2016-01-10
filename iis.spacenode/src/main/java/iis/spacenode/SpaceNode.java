@@ -74,9 +74,11 @@ public class SpaceNode implements ConfigurableComponent
 		for (String s : properties.keySet()) {
 			s_logger.info("Activate - "+s+": "+properties.get(s));
 		}
-		try  {	
+		try  {
 			dev_SHT31 = new SHT31();
 			dev_BMP280 = new BMP280();
+			position = m_positionService.getNmeaPosition();
+			dev_BMP280.calcSeaLevelhPa(position.getAltitude());
 			doUpdate();
 		}
 		catch (Exception e) {

@@ -216,5 +216,11 @@ public class BMP280 {
 		tempPressure /= 100;
 		altitude = 44330 * (1.0 - Math.pow(tempPressure / seaLevelhPa, 0.1903));
 	}
+	
+	public void calcSeaLevelhPa(double altitude) throws Exception {
+		readTemperature();
+		readPressure();
+		seaLevelhPa = pressure * Math.pow((1 - ((0.0065 * altitude) / (temperature + 0.0065 * altitude + 273.15))), -5.257);
+	}
 
 }
