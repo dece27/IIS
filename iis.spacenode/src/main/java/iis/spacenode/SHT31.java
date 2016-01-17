@@ -25,6 +25,8 @@ public class SHT31 {
 	public static final int SHT31_HEATEREN             	= 0x306D & 0xFFFF;
 	public static final int SHT31_HEATERDIS            	= 0x3066 & 0xFFFF;
 
+	public static final int SHT31_TRIGGER            	= 0x2C06 & 0xFFFF;
+
 
 	// ----------------------------------------------------------------
 	//
@@ -84,11 +86,14 @@ public class SHT31 {
 	//   Methods
 	//
 	// ----------------------------------------------------------------
+	public void close() throws Exception {
+		device.close();
+	}
+
 	private void writeCommand(int cmd) throws Exception {
-		device.begin();
-		device.write(cmd >> 8);				//MSB
-		device.write(cmd & 0xFFFFFF);		//LSB
-		device.end();
+		ByteBuffer buf = ByteBuffer.allocate(2);
+		buf.putShort((short) cmd);
+		device.write(buf);
 	}
 
 	public void reset() throws Exception {
@@ -109,6 +114,7 @@ public class SHT31 {
 		ByteBuffer SRH = ByteBuffer.allocate(2);
 		double sTemp, sHum;
 
+		//		writeCommand(SHT31_TRIGGER);
 		writeCommand(SHT31_MEAS_HIGHREP);
 		Thread.sleep(500);
 		device.read(readBuffer);

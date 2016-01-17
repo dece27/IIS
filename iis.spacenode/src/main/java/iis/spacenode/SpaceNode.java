@@ -1,5 +1,7 @@
 package iis.spacenode;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -32,7 +34,7 @@ public class SpaceNode implements ConfigurableComponent
 	private static final String   		SAMPLING_RATE_PROP_NAME   = "sampling.rate";
 
 	//SHT31
-	private SHT31						dev_SHT31;
+	//	private SHT31						dev_SHT31;
 	private double						SHT31_t, SHT31_h;
 
 	//BMP280
@@ -75,15 +77,22 @@ public class SpaceNode implements ConfigurableComponent
 			s_logger.info("Activate - "+s+": "+properties.get(s));
 		}
 		try  {
-			dev_SHT31 = new SHT31();
-			dev_SHT31.heater(true);
+			//			dev_SHT31 = new SHT31();
+			//			dev_SHT31.heater(true);
 			dev_BMP280 = new BMP280();
-			position = m_positionService.getNmeaPosition();
-			dev_BMP280.calcSeaLevelhPa(position.getAltitude());
+			//			position = m_positionService.getNmeaPosition();
+			//			dev_BMP280.calcSeaLevelhPa(position.getAltitude());
 			doUpdate();
 		}
 		catch (Exception e) {
 			s_logger.error("Error during component activation", e);
+			try {
+				dev_BMP280.close();
+				//				dev_SHT31.close();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				s_logger.error("Error during devices closing", e1);
+			}
 			throw new ComponentException(e);
 		}
 		s_logger.info("Activating " + APP_ID + "...Done.");
@@ -94,11 +103,18 @@ public class SpaceNode implements ConfigurableComponent
 	{
 		s_logger.info("Deactivating " + APP_ID + "...");
 
+		//				try {
+		//					dev_SHT31.heater(false);
+		//				} catch (Exception e) {
+		//					e.printStackTrace();
+		//					s_logger.error("Error disabling SHT31-D Heater", e);
+		//				}
 		try {
-			dev_SHT31.heater(false);
+			dev_BMP280.close();
+			//			dev_SHT31.close();
 		} catch (Exception e) {
 			e.printStackTrace();
-			s_logger.error("Error disabling SHT31-D Heater", e);
+			s_logger.error("Error during devices closing", e);
 		}
 		m_worker.shutdown();
 
@@ -152,16 +168,23 @@ public class SpaceNode implements ConfigurableComponent
 	private void doSample() 
 	{
 		//GPS
-		position = m_positionService.getNmeaPosition();
-		latitude = position.getLatitude();
-		longitude = position.getLongitude();
-		altitude = position.getAltitude();
-		System.out.println("GPS: Lat = " + latitude + " deg, Lon = " + longitude + " deg, Alt = " + altitude + " m");
+		//		position = m_positionService.getNmeaPosition();
+		//		latitude = position.getLatitude();
+		//		longitude = position.getLongitude();
+		//		altitude = position.getAltitude();
+		//		System.out.println("GPS: Lat = " + latitude + " deg, Lon = " + longitude + " deg, Alt = " + altitude + " m");
 
 		//SHT31-D
 		try {
-			SHT31_t = dev_SHT31.getTemperature();
-			SHT31_h = dev_SHT31.getHumidity();
+			//			SHT31_t = dev_SHT31.getTemperature();
+			//			SHT31_h = dev_SHT31.getHumidity();
+			ProcessBuilder pb = new ProcessBuilder("/usr/bin/python", "/home/pi/sht31.py");
+			Process p = pb.start();
+			BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			String ret[] = in.readLine().trim().split(";");
+			in.close();
+			SHT31_t = Double.parseDouble(ret[0]);
+			SHT31_h = Double.parseDouble(ret[1]);
 			System.out.println("SHT31: Temp = " + SHT31_t + " °C, Hum = " + SHT31_h + " %");
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -177,6 +200,12 @@ public class SpaceNode implements ConfigurableComponent
 		} catch(Exception e) {
 			e.printStackTrace();
 			s_logger.error("Error during BMP280 reading", e);
+			try {
+				dev_BMP280.close();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				s_logger.error("Error during BMP280 closing", e1);
+			}
 		}
 	}
 }

@@ -79,10 +79,11 @@ public class BMP280 {
 				);
 		device = (I2CDevice) DeviceManager.open(I2CDevice.class, config);
 		device.read(BMP280_REGISTER_CHIPID, 1, chipIdBuffer);
+		chipIdBuffer.flip();
 		if(chipIdBuffer.get() != 0x58)
 			throw new InstantiationException("Wrong chip ID");
 		readCoefficients();
-		device.write(BMP280_REGISTER_CONTROL, 1, ByteBuffer.allocate(1).put((byte) 0x3F));
+		device.write(BMP280_REGISTER_CONTROL << 8, 1, ByteBuffer.allocate(1).put((byte) 0x3F));
 	}
 
 	public BMP280() throws Exception {
@@ -128,32 +129,48 @@ public class BMP280 {
 	//   Methods
 	//
 	// ----------------------------------------------------------------
+	public void close() throws Exception {
+		device.close();
+	}
+	
 	private void readCoefficients() throws Exception {
 		ByteBuffer readCoeff = ByteBuffer.allocate(2);
 		readCoeff.order(ByteOrder.LITTLE_ENDIAN);
-		device.read(BMP280_REGISTER_DIG_T1, 2, readCoeff);
+		device.read(BMP280_REGISTER_DIG_T1 << 8, 2, readCoeff);
+		readCoeff.flip();
 		dig_T1 = readCoeff.getShort() & 0xFFFF;
-		device.read(BMP280_REGISTER_DIG_T2, 2, readCoeff);
+		device.read(BMP280_REGISTER_DIG_T2 << 8, 2, readCoeff);
+		readCoeff.flip();
 		dig_T2 = readCoeff.getShort();
-		device.read(BMP280_REGISTER_DIG_T3, 2, readCoeff);
+		device.read(BMP280_REGISTER_DIG_T3 << 8, 2, readCoeff);
+		readCoeff.flip();
 		dig_T3 = readCoeff.getShort();
-		device.read(BMP280_REGISTER_DIG_P1, 2, readCoeff);
+		device.read(BMP280_REGISTER_DIG_P1 << 8, 2, readCoeff);
+		readCoeff.flip();
 		dig_P1 = readCoeff.getShort() & 0xFFFF;
-		device.read(BMP280_REGISTER_DIG_P2, 2, readCoeff);
+		device.read(BMP280_REGISTER_DIG_P2 << 8, 2, readCoeff);
+		readCoeff.flip();
 		dig_P2 = readCoeff.getShort();
-		device.read(BMP280_REGISTER_DIG_P3, 2, readCoeff);
+		device.read(BMP280_REGISTER_DIG_P3 << 8, 2, readCoeff);
+		readCoeff.flip();
 		dig_P3 = readCoeff.getShort();
-		device.read(BMP280_REGISTER_DIG_P4, 2, readCoeff);
+		device.read(BMP280_REGISTER_DIG_P4 << 8, 2, readCoeff);
+		readCoeff.flip();
 		dig_P4 = readCoeff.getShort();
-		device.read(BMP280_REGISTER_DIG_P5, 2, readCoeff);
+		device.read(BMP280_REGISTER_DIG_P5 << 8, 2, readCoeff);
+		readCoeff.flip();
 		dig_P5 = readCoeff.getShort();
-		device.read(BMP280_REGISTER_DIG_P6, 2, readCoeff);
+		device.read(BMP280_REGISTER_DIG_P6 << 8, 2, readCoeff);
+		readCoeff.flip();
 		dig_P6 = readCoeff.getShort();
-		device.read(BMP280_REGISTER_DIG_P7, 2, readCoeff);
+		device.read(BMP280_REGISTER_DIG_P7 << 8, 2, readCoeff);
+		readCoeff.flip();
 		dig_P7 = readCoeff.getShort();
-		device.read(BMP280_REGISTER_DIG_P8, 2, readCoeff);
+		device.read(BMP280_REGISTER_DIG_P8 << 8, 2, readCoeff);
+		readCoeff.flip();
 		dig_P8 = readCoeff.getShort();
-		device.read(BMP280_REGISTER_DIG_P9, 2, readCoeff);
+		device.read(BMP280_REGISTER_DIG_P9 << 8, 2, readCoeff);
+		readCoeff.flip();
 		dig_P9 = readCoeff.getShort();
 	}
 
@@ -163,10 +180,12 @@ public class BMP280 {
 		int var1, var2, adc_T;
 		float T;
 
-		device.read(BMP280_REGISTER_TEMPDATA, 2, adc_T2_Buffer);
+		device.read(BMP280_REGISTER_TEMPDATA << 8, 2, adc_T2_Buffer);
+		adc_T2_Buffer.flip();
 		adc_T = adc_T2_Buffer.getShort() & 0xFFFF;
 		adc_T <<= 8;
-		device.read(BMP280_REGISTER_TEMPDATA + 2, 1, adc_T1_Buffer);
+		device.read((BMP280_REGISTER_TEMPDATA + 2) << 8, 1, adc_T1_Buffer);
+		adc_T1_Buffer.flip();
 		adc_T |= adc_T1_Buffer.get();
 		adc_T >>= 4;
 
@@ -183,10 +202,12 @@ public class BMP280 {
 		long var1, var2, p;
 		int adc_P;
 
-		device.read(BMP280_REGISTER_PRESSUREDATA, 2, adc_P2_Buffer);
+		device.read(BMP280_REGISTER_PRESSUREDATA << 8, 2, adc_P2_Buffer);
+		adc_P2_Buffer.flip();
 		adc_P = adc_P2_Buffer.getShort() & 0xFFFF;
 		adc_P <<= 8;
-		device.read(BMP280_REGISTER_PRESSUREDATA + 2, 1, adc_P1_Buffer);
+		device.read((BMP280_REGISTER_PRESSUREDATA + 2) << 8, 1, adc_P1_Buffer);
+		adc_P1_Buffer.flip();
 		adc_P |= adc_P1_Buffer.get();
 		adc_P >>= 4;
 
@@ -199,6 +220,7 @@ public class BMP280 {
 
 		if (var1 == 0) {
 			pressure = 0;  // avoid exception caused by division by zero
+			return;
 		}
 		p = 1048576 - adc_P;
 		p = (((p<<31) - var2)*3125) / var1;

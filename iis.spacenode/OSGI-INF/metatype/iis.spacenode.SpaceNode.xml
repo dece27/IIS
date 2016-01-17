@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0" localization="en_us">
-    <OCD id="iis.spacenode"
+    <OCD id="iis.spacenode.SpaceNode"
          name="IIS - Space Node" 
          description="Eclipse Kura application for Iot into Space - Space Node project.">
         
@@ -18,6 +18,6 @@
     </OCD>
     
     <Designate pid="iis.spacenode.SpaceNode">
-        <Object ocdref="iis.spacenode"/>
+        <Object ocdref="iis.spacenode.SpaceNode"/>
     </Designate>
 </MetaData>
